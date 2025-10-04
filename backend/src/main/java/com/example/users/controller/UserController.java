@@ -1,10 +1,14 @@
 package com.example.users.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.users.dto.UserDto;
 import com.example.users.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -19,51 +23,50 @@ public class UserController {
         this.service = service;
     }
 
+    @Operation(summary = "Lista todos os usuários", description = "Retorna uma lista de todos os usuários cadastrados no sistema.")
     @GetMapping
     public List<UserDto> getAll() {
         return service.findAll();
     }
 
+    @Operation(summary = "Detalhes do usuário", description = "Retorna os detalhes de um usuário específico com base no ID fornecido.")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getById(@PathVariable Long id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.findById(id));
     }
 
+    @Operation(summary = "Cria um novo usuário", description = "Adiciona um novo usuário ao sistema com os dados fornecidos.")
     @PostMapping
-    public ResponseEntity<UserDto> create(@RequestBody UserDto dto) {
-        try {
-            return ResponseEntity.ok(service.create(dto));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto dto) {
+        UserDto created = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+
     }
 
+    @Operation(summary = "Atualiza um usuário", description = "Atualiza os dados do usuário com base no ID fornecido.")
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> update(@PathVariable Long id, @RequestBody UserDto dto) {
-        try {
-            return service.update(id, dto)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+    public ResponseEntity<UserDto> update(@PathVariable Long id, @Valid @RequestBody UserDto dto) {
+        UserDto updated = service.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
+    @Operation(summary = "Deleta um usuário", description = "Remove o usuário do sistema com base no ID fornecido.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return service.delete(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Atualiza parcialmente os dados do usuário", description = "Realiza a atualização parcial dos dados do usuário, ou seja, pode enviar apenas os campos que deseja atualizar.")
     @PatchMapping("/{id}")
     public ResponseEntity<UserDto> patch(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        try {
-            return service.patch(id, updates)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        UserDto updated = service.patch(id, updates);
+        return ResponseEntity.ok(updated);
+    }
+
+    @Operation(summary = "Estatísticas dos usuários", description = "Retorna estatísticas sobre os usuários cadastrados, como total de usuários, ativos, inativos e distribuição por função.")
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getStats() {
+        return ResponseEntity.ok(service.getStats());
     }
 }
