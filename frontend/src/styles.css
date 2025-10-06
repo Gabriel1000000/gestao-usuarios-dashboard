@@ -1,0 +1,20 @@
+:root { font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; }
+body { margin: 0; background: #0b0d10; color: #e6e6e6; }
+a { color: #9ad1ff; text-decoration: none; }
+a.active { text-decoration: underline; }
+.container { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #12161b; border-bottom: 1px solid #1c222b;}
+.topbar .logo { font-weight: 700; color: #fff; }
+.topbar nav a { margin-left: 12px; color: #c9d1d9; }
+
+.card { background:#11151a; border:1px solid #1f2630; border-radius: 10px; padding:16px; margin-bottom:16px; }
+.btn { background:#2d6cdf; color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; }
+.btn.secondary { background:#404859; }
+.btn.danger { background:#c0392b; }
+
+.table { width:100%; border-collapse: collapse; }
+.table th, .table td { padding:10px; border-bottom:1px solid #1f2630; text-align:left; }
+.row-actions { display:flex; gap:8px; }
+.input, .select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #2a3240; background:#0e1318; color:#e6e6e6; }
+.form { display:grid; gap:12px; max-width: 520px; }
