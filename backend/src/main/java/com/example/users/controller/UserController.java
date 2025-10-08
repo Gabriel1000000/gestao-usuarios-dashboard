@@ -69,4 +69,30 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> getStats() {
         return ResponseEntity.ok(service.getStats());
     }
+
+    
+    // --- Filtros independentes (não combinados) ---
+    @Operation(summary = "Buscar usuários pelo nome (não combinado)")
+    @GetMapping("/by-name")
+    public ResponseEntity<List<UserDto>> findByName(@RequestParam String name) {
+        return ResponseEntity.ok(service.findByName(name));
+    }
+
+    @Operation(summary = "Buscar usuários pelo e-mail (não combinado)")
+    @GetMapping("/by-email")
+    public ResponseEntity<List<UserDto>> findByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(service.findByEmailLike(email));
+    }
+
+    @Operation(summary = "Buscar usuários pela função (não combinado)")
+    @GetMapping("/by-role")
+    public ResponseEntity<List<UserDto>> findByRole(@RequestParam String role) {
+        return ResponseEntity.ok(service.findByRoleExactly(role));
+    }
+
+    @Operation(summary = "Buscar usuários por status ativo/inativo (não combinado)")
+    @GetMapping("/by-active")
+    public ResponseEntity<List<UserDto>> findByActive(@RequestParam Boolean active) {
+        return ResponseEntity.ok(service.findByActive(active));
+    }
 }

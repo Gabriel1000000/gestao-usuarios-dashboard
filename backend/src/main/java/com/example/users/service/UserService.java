@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,9 +44,16 @@ public class UserService {
     }
 
     public UserDto create(UserDto dto) {
-        repo.findByEmail(dto.getEmail()).ifPresent(u -> {
+        // repo.findByEmail(dto.getEmail()).ifPresent(u -> {
+        //     throw new IllegalArgumentException("Email já cadastrado");
+        // });
+        String email = dto.getEmail();
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email é obrigatório.");
+
+        if (repo.existsByEmailIgnoreCase(email)) {
             throw new IllegalArgumentException("Email já cadastrado");
-        });
+        }
+
         User u = toEntity(dto);
         u.setId(null);
         return toDto(repo.save(u));
@@ -53,10 +61,17 @@ public class UserService {
 
     public UserDto update(Long id, UserDto dto) {
         User existing = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        String newEmail = dto.getEmail();
 
         if (!existing.getEmail().equals(dto.getEmail())) {
-            repo.findByEmail(dto.getEmail()).filter(u -> !u.getId().equals(id))
-                    .ifPresent(u -> { throw new IllegalArgumentException("Email já cadastrado"); });
+            if (newEmail == null || newEmail.isBlank()) {
+                throw new IllegalArgumentException("Email é obrigatório.");
+            }
+            boolean duplicado = repo.findByEmail(newEmail).stream().anyMatch(u -> !u.getId().equals(id));
+            if (duplicado) {
+                throw new IllegalArgumentException("Email já cadastrado");
+            }
+        existing.setEmail(newEmail);
         }
 
         existing.setName(dto.getName());
@@ -73,15 +88,23 @@ public class UserService {
 
     public UserDto patch(Long id, Map<String, Object> updates) {
         User existing = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-
+        
         if (updates.containsKey("name") && updates.get("name") != null)
             existing.setName(updates.get("name").toString());
 
         if (updates.containsKey("email") && updates.get("email") != null) {
             String emailStr = updates.get("email").toString();
-            repo.findByEmail(emailStr).filter(u -> !u.getId().equals(id))
-                    .ifPresent(u -> { throw new IllegalArgumentException("Email já cadastrado"); });
-            existing.setEmail(emailStr);
+            // só faz algo se mudou
+            if (!Objects.equals(existing.getEmail(), emailStr)) {
+                
+                if (emailStr == null || emailStr.isBlank()) {
+                    throw new IllegalArgumentException("Email é obrigatório.");
+                }
+                if (repo.existsByEmailIgnoreCase(emailStr)) {
+                    throw new IllegalArgumentException("Email já cadastrado");
+                }
+                existing.setEmail(emailStr);
+            }
         }
 
         if (updates.containsKey("role") && updates.get("role") != null)
@@ -111,5 +134,41 @@ public class UserService {
         stats.put("byActive", activeStats);
 
         return stats;
+    }
+
+    // =========================
+    // NOVOS MÉTODOS DE BUSCA
+    // (não combinam filtros)
+    // =========================
+
+    public List<UserDto> findByName(String name) {
+        String q = name == null ? "" : name.trim();
+        if (q.isEmpty()) return List.of();
+        return repo.findByName(q).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDto> findByEmailLike(String email) {
+        String q = email == null ? "" : email.trim();
+        if (q.isEmpty()) return List.of();
+        return repo.findByEmail(q).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDto> findByRoleExactly(String role) {
+        String q = role == null ? "" : role.trim();
+        if (q.isEmpty()) return List.of();
+        return repo.findByRole(q).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDto> findByActive(Boolean active) {
+        if (active == null) return List.of();
+        return repo.findByActive(active).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

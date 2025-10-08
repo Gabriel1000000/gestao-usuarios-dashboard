@@ -9,9 +9,16 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByEmail(String email);
+    // Optional<User> findByEmail(String email);
 
     List<User> findByRole(String role);
+
+    boolean existsByEmailIgnoreCase(String email);
+
+    List<User> findByName(String name);
+    List<User> findByEmail(String email);
+    List<User> findByActive(Boolean active);
+
 
     @Query("SELECT u.role, COUNT(u) FROM User u GROUP BY u.role")
     List<Object[]> countByRole();
