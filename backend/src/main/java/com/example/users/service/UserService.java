@@ -144,7 +144,7 @@ public class UserService {
     public List<UserDto> findByName(String name) {
         String q = name == null ? "" : name.trim();
         if (q.isEmpty()) return List.of();
-        return repo.findByName(q).stream()
+        return repo.findByNameContainingIgnoreCase(q).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
