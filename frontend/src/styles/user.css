@@ -1,0 +1,13 @@
+/* UsersList page-specific */
+.users-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.users-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 16px 0;
+}

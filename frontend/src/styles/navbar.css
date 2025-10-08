@@ -1,0 +1,39 @@
+/* Navbar */
+.navbar {
+  position: sticky; 
+  top: 0; 
+  z-index: 10;
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #0f121aee; 
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-brand { 
+  font-weight: 700; 
+  letter-spacing: .3px; 
+}
+
+.navbar-links { 
+  display: flex; 
+  gap: 8px; 
+}
+
+.nav-link {
+  padding: 8px 10px;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+}
+
+.nav-link:hover { 
+  background: #151a22; 
+  border-bottom-color: #2f3950; 
+}
+
+.nav-link.active { 
+  border-bottom-color: var(--primary); 
+  font-weight: 600; 
+}

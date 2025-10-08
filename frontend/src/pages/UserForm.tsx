@@ -6,6 +6,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { User } from '../types'
 import { isAxiosError } from 'axios'
+import '../styles/newser.css'
+
 
 // Schema com saída garantida (active sempre boolean)
 const schema = z.object({

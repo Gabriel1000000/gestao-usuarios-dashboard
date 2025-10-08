@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { User } from '../types'
+import '../styles/user.css'
+
+
 
 export default function UsersList() {
   const [users, setUsers] = useState<User[]>([])

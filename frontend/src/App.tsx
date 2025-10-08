@@ -1,20 +1,13 @@
-import { Link, NavLink, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import UsersList from './pages/UsersList'
 import UserForm from './pages/UserForm'
+import NavBar from './components/NavBar'
 
 export default function App() {
   return (
     <div className="app">
-      <header className="topbar">
-        <Link to="/" className="logo">Users Dashboard</Link>
-        <nav>
-          <NavLink to="/" end>Dashboard</NavLink>
-          <NavLink to="/users">Usuários</NavLink>
-          <NavLink to="/users/new">Novo</NavLink>
-        </nav>
-      </header>
-
+      <NavBar />
       <main className="container">
         <Routes>
           <Route path="/" element={<Dashboard />} />
