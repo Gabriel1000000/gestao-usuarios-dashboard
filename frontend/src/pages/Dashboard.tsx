@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react'
-import { api } from '../api/client'
 import { StatsResponse } from '../types'
-import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
-} from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
+import { getStats } from '../api/userApi'
 import '../styles/dashboard.css'
 
-const COLORS = ['#2d6cdf', '#00c49f', '#ffbb28', '#ff8042', '#a66bff']
+const COLORS = ['#8B5CF6', '#10B981', '#ffbb28', '#ff8042', '#a66bff']
 
 export default function Dashboard() {
   const [stats, setStats] = useState<StatsResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    api.get('/users/stats').then(r => setStats(r.data)).catch(console.error)
+    getStats().then(setStats).catch((e) => {
+        console.error(e)
+        setError('Falha ao carregar estatísticas.')
+      })
   }, [])
 
+  if (error) return <div className="card">{error}</div>
   if (!stats) return <div className="card">Carregando estatísticas…</div>
 
   const roleData = Object.entries(stats.byRole).map(([role, value]) => ({ role, value }))
@@ -24,7 +26,6 @@ export default function Dashboard() {
   const totalAtivos = stats.byActive.active || 0
   const totalInativos = stats.byActive.inactive || 0
   const totalUsuarios = totalAtivos + totalInativos
-
 
   return (
     <div className="dashboard-grid">
@@ -44,8 +45,8 @@ export default function Dashboard() {
               <XAxis dataKey="role" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Legend />
-              <Bar dataKey="value" name="Função">
+              <Legend/>
+              <Bar dataKey="value" name="Quantidade">
                 {roleData.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
@@ -60,13 +61,7 @@ export default function Dashboard() {
         <div style={{ width: '100%', height: 300 }}>
           <ResponsiveContainer>
             <PieChart>
-              <Pie
-                dataKey="value"
-                data={activeData}
-                nameKey="status"
-                outerRadius={100}
-                label
-              >
+              <Pie dataKey="value" data={activeData} nameKey="status" outerRadius={100} label>
                 {activeData.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}

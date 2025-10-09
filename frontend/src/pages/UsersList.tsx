@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { api } from '../api/client'
 import { User } from '../types'
+import { listAll, removeUser } from '../api/userApi'
+import UserFilters from '../components/UserFilters'
 import '../styles/user.css'
-
-
 
 export default function UsersList() {
   const [users, setUsers] = useState<User[]>([])
   const nav = useNavigate()
 
-  const load = () => api.get<User[]>('/users').then(r => setUsers(r.data))
+  const load = async () => {
+    const data = await listAll()
+    setUsers(data)
+  }
+
   useEffect(() => { load() }, [])
 
   const onDelete = async (id?: number) => {
     if (!id) return
     if (!confirm('Remover este usuário?')) return
-    await api.delete(`/users/${id}`)
+    await removeUser(id)
     await load()
   }
 
@@ -26,6 +29,9 @@ export default function UsersList() {
         <h2>Usuários</h2>
         <Link to="/users/new" className="btn">Novo Usuário</Link>
       </div>
+
+      {/* usa UserFilters; ele chamará os métodos de filtro do userApi e faz onResults */}
+      <UserFilters onResults={setUsers} onResetAll={load} />
 
       <table className="table">
         <thead>

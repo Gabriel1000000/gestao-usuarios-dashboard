@@ -3,11 +3,9 @@ import { useForm, type SubmitHandler, type Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, useParams } from 'react-router-dom'
-import { api } from '../api/client'
-import { User } from '../types'
 import { isAxiosError } from 'axios'
+import { getUser, createUser, updateUser } from '../api/userApi'
 import '../styles/newser.css'
-
 
 // Schema com saída garantida (active sempre boolean)
 const schema = z.object({
@@ -16,7 +14,6 @@ const schema = z.object({
   role: z.string().min(2, 'Informe a função'),
   active: z.coerce.boolean().default(true),
 })
-
 type FormData = z.output<typeof schema>
 
 export default function UserForm() {
@@ -36,58 +33,50 @@ export default function UserForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver,
-    defaultValues: {
-      name: '',
-      email: '',
-      role: '',
-      active: true,
-    },
+    defaultValues: { name: '', email: '', role: '', active: true },
   })
 
+  // carregar para edição
   useEffect(() => {
     if (!id) return
-    api.get<User>(`/users/${id}`).then((r) => {
-      const u = r.data
-      setValue('name', u.name)
-      setValue('email', u.email)
-      setValue('role', u.role)
-      setValue('active', !!u.active)
-    })
+    getUser(id).then(u => {
+        setValue('name', u.name)
+        setValue('email', u.email)
+        setValue('role', u.role)
+        setValue('active', !!u.active)
+      }).catch((e) => {
+        console.error(e)
+        setApiError('Falha ao carregar usuário.')
+      })
   }, [id, setValue])
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setApiError(null)
-    clearErrors() // limpa erros antigos
+    clearErrors()
 
     try {
       if (id) {
-        await api.put(`/users/${id}`, data)
+        await updateUser(id, data)
       } else {
-        await api.post('/users', data)
+        await createUser(data)
       }
       nav('/users')
     } catch (err) {
-      // Trata respostas do backend
       if (isAxiosError(err)) {
         const status = err.response?.status
-        const payload = err.response?.data as Record<string, unknown>;
+        const payload = err.response?.data as Record<string, unknown>
 
-
-        // 400 de validação ou regra de negócio (ex: email duplicado)
+        // 400 de validação/regra de negócio
         if (status === 400) {
-          // Se vier no padrão { details: { field: message } }
-          if (payload?.details && typeof payload.details === 'object') {
-            Object.entries(payload.details).forEach(([field, message]) => {
+          if (payload?.['details'] && typeof payload['details'] === 'object') {
+            Object.entries(payload['details'] as Record<string, unknown>).forEach(([field, message]) => {
               if (field in schema.shape) {
                 setError(field as keyof FormData, { type: 'server', message: String(message) })
               }
             })
           }
-
-          // Mensagem direta (ex.: "Email já cadastrado")
-          if (payload?.message) {
-            const msg = String(payload.message)
-            // heurística: se a mensagem mencionar email, joga no campo
+          if (payload?.['message']) {
+            const msg = String(payload['message'])
             if (/email/i.test(msg)) {
               setError('email', { type: 'server', message: msg })
             } else {
@@ -97,24 +86,19 @@ export default function UserForm() {
           }
         }
 
-        // Outros erros conhecidos
-        if (status === 409 && payload?.message) {
-          // se você resolver retornar 409 para conflito, cai aqui
-          setError('email', { type: 'server', message: String(payload.message) })
+        if (status === 409 && payload?.['message']) {
+          setError('email', { type: 'server', message: String(payload['message']) })
           return
         }
 
-        // const payload = err.response?.data as Record<string, unknown>;
         const message =
-        typeof payload?.message === 'string'
-            ? payload.message
-            : 'Erro ao salvar. Tente novamente.';
-        setApiError(message);
-
+          typeof payload?.['message'] === 'string'
+            ? (payload['message'] as string)
+            : 'Erro ao salvar. Tente novamente.'
+        setApiError(message)
         return
       }
 
-      // fallback para erros não-axios
       setApiError('Erro inesperado. Tente novamente.')
     }
   }
@@ -123,7 +107,6 @@ export default function UserForm() {
     <div className="card">
       <h2>{id ? 'Editar Usuário' : 'Novo Usuário'}</h2>
 
-      {/* Alerta geral */}
       {apiError && (
         <div className="card" style={{ background: '#2a1b1b', borderColor: '#5e2a2a', marginBottom: 12 }}>
           <strong>Erro:</strong> {apiError}
