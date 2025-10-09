@@ -343,5 +343,5 @@ npm run dev
 
 ## 📄 Licença
 
-Este projeto está sob a licença [MIT](LICENSE) 
+Este projeto está sob a licença [MIT](LICENSE) </br>
 Criado por **Gabriel Alves Varella da Costa** com fins educacionais.
