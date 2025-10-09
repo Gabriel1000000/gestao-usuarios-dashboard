@@ -2,17 +2,21 @@ version: "3.8"
 
 services:
   db:
-    image: postgres:15
-    container_name: users_db
+    image: postgres:16-alpine
+    container_name: users-db
     environment:
       POSTGRES_DB: appdb
       POSTGRES_USER: appuser
       POSTGRES_PASSWORD: apppass
-    volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -33,13 +37,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=http://backend:8080/api
+        # Use proxy do Nginx no container do frontend
+        - VITE_API_BASE_URL=/api
     container_name: users_frontend
     depends_on:
       - backend
     ports:
-      - "3000:80"   # 3000 no host -> 80 no container (nginx)
-
+      - "3000:80" # 3000 no host -> 80 no container (nginx)
 
 volumes:
-  db_data:
+  dbdata:
