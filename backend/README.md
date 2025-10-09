@@ -236,5 +236,5 @@ curl -s http://localhost:8080/api/users/statistics | jq
 
 ## 📄 Licença
 
-Este projeto está sob a licença [MIT](LICENSE) 
-Criado por **Gabriel Alves Varella da Costa** com fins educacionais.
+Este projeto está sob a licença [MIT](LICENSE) </br>
+Criado por **Gabriel Alves Varella da Costa**.
