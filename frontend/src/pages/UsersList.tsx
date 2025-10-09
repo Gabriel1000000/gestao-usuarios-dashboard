@@ -24,41 +24,73 @@ export default function UsersList() {
   }
 
   return (
-    <div className="card">
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+    <div className="card users-page">
+      <div className="users-header">
         <h2>Usuários</h2>
         <Link to="/users/new" className="btn">Novo Usuário</Link>
       </div>
 
-      {/* usa UserFilters; ele chamará os métodos de filtro do userApi e faz onResults */}
+      {/* filtros (mantém sua lógica de onResults/onResetAll) */}
       <UserFilters onResults={setUsers} onResetAll={load} />
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Nome</th><th>Email</th><th>Função</th><th>Ativo</th><th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(u => (
-            <tr key={u.id}>
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{u.active ? 'Sim' : 'Não'}</td>
-              <td>
-                <div className="row-actions">
-                  <button className="btn secondary" onClick={() => nav(`/users/${u.id}`)}>Editar</button>
-                  <button className="btn danger" onClick={() => onDelete(u.id)}>Excluir</button>
+      {users.length === 0 ? (
+        <div className="users-empty">Nenhum usuário encontrado.</div>
+      ) : (
+        <>
+          {/* TABELA (desktop / tablets) */}
+          <div className="table-responsive users-table-wrap" role="region" aria-label="Tabela de usuários" tabIndex={0}>
+            <table className="table users-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Função</th>
+                  <th>Ativo</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td>{u.name}</td>
+                    <td>{u.email}</td>
+                    <td>{u.role}</td>
+                    <td>{u.active ? 'Sim' : 'Não'}</td>
+                    <td>
+                      <div className="row-actions">
+                        <button className="btn secondary" onClick={() => nav(`/users/${u.id}`)}>Editar</button>
+                        <button className="btn danger" onClick={() => onDelete(u.id)}>Excluir</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* CARDS (mobile) */}
+          <div className="users-cards" aria-label="Lista de usuários (cards)">
+            {users.map(u => (
+              <article className="user-card" key={u.id}>
+                <header className="user-card__header">
+                  <h3 className="user-card__title">{u.name}</h3>
+                  <span className={`badge ${u.active ? 'badge-ok' : 'badge-muted'}`}>
+                    {u.active ? 'Ativo' : 'Inativo'}
+                  </span>
+                </header>
+                <div className="user-card__body">
+                  <p><strong>E-mail:</strong> {u.email}</p>
+                  <p><strong>Função:</strong> {u.role}</p>
                 </div>
-              </td>
-            </tr>
-          ))}
-          {users.length === 0 && (
-            <tr><td colSpan={5}>Nenhum usuário encontrado.</td></tr>
-          )}
-        </tbody>
-      </table>
+                <footer className="user-card__footer">
+                  <button className="btn secondary btn-block" onClick={() => nav(`/users/${u.id}`)}>Editar</button>
+                  <button className="btn danger btn-block" onClick={() => onDelete(u.id)}>Excluir</button>
+                </footer>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
