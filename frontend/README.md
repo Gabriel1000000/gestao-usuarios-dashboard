@@ -191,7 +191,7 @@ npm run preview  # Pré-visualizar build
 
 ## 📄 Licença
 
-Este projeto está sob a licença [MIT](LICENSE) 
-Criado por **Gabriel Alves Varella da Costa** com fins educacionais.
+Este projeto está sob a licença [MIT](LICENSE) </br>
+Criado por **Gabriel Alves Varella da Costa**.
 
 ---
