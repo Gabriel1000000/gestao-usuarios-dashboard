@@ -1,39 +1,39 @@
 # Gestão de Usuários — Dashboard (Java + React + PostgreSQL + Docker)
 
 ![Backend](https://img.shields.io/badge/Backend-Spring%20Boot%20%2B%20Java%2017-22c55e?logo=springboot&logoColor=white)
-![Database](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)
+![Database](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
 ![Build](https://img.shields.io/badge/Build-Maven-FF5A1F?logo=apachemaven)
 ![Containers](https://img.shields.io/badge/Containers-Docker%20Compose-2496ED?logo=docker)
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-0ea5e9?logo=react)
 ![UI Forms](https://img.shields.io/badge/Forms-react--hook--form%20%2B%20zod-0ea5e9)
 ![Charts](https://img.shields.io/badge/Charts-recharts-0ea5e9)
+![Migrations](https://img.shields.io/badge/DB-Migrations%20(Flyway)-CC0200?logo=flyway)
 ![Deploy](https://img.shields.io/badge/Deploy-Nginx-22c55e?logo=nginx)
 
-
-Aplicação **full-stack** com **Spring Boot (Java)**, **React (Vite + TypeScript)** e **PostgreSQL 15**.  
-Inclui **CRUD de usuários**, **dashboard com gráficos (Recharts)**, **documentação de API (Swagger)** e execução com **Docker Compose** (backend, frontend e banco).  
-No frontend é possível **filtrar por nome, e-mail, função (role) e status (ativo/inativo)**, e **combinar até 3 filtros** (interseção por `id` no cliente).
+Aplicação **full‑stack** com **Spring Boot (Java 17)**, **React (Vite + TypeScript)** e **PostgreSQL 16**.  
+Inclui **CRUD de usuários**, **dashboard com gráficos (Recharts)**, **documentação de API (Swagger)** e execução com **Docker Compose** (db + backend + frontend).  
+No frontend é possível **filtrar por nome, e‑mail, função (role) e status (ativo/inativo)** e **combinar até 3 filtros** (interseção por `id` no cliente).
 
 ---
 
 ## 🧭 Sumário
-- [Visão geral](#visão-geral)
-- [Diagramas](#diagramas)
-  - [Fluxo do projeto](#fluxo-do-projeto)
-  - [Modelo ER do banco](#modelo-er-do-banco)
-- [Tecnologias & versões](#tecnologias--versões)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Pré-requisitos](#pré-requisitos)
-- [Como executar (Docker)](#como-executar-docker)
-- [URLs úteis](#urls-úteis)
-- [Configuração (compose, backend, proxy)](#configuração-compose-backend-proxy)
-- [Rotas do Frontend](#rotas-do-frontend)
-- [API & Endpoints](#api--endpoints)
-- [Testes rápidos (curl)](#testes-rápidos-curl)
-- [Desenvolvimento local (opcional)](#desenvolvimento-local-opcional)
-- [Troubleshooting](#troubleshooting)
-- [Segurança & boas práticas](#segurança--boas-práticas)
-- [Licença](#licença)
+- [Visão geral](#-visão-geral)
+- [Diagramas](#-diagramas)
+  - [Fluxo do projeto](#-fluxo-do-projeto)
+  - [Modelo ER do banco](#-modelo-er-do-banco)
+- [Tecnologias & versões](#-tecnologias--versões)
+- [Estrutura do repositório](#-estrutura-do-repositório)
+- [Pré-requisitos](#-pré-requisitos)
+- [Como executar (Docker)](#️-como-executar-docker)
+- [URLs úteis](#-urls-úteis)
+- [Configuração (compose, backend, proxy)](#️-configuração-compose-backend-proxy)
+- [Rotas do Frontend](#-rotas-do-frontend)
+- [API & Endpoints](#-api--endpoints)
+- [Testes rápidos (curl)](#-testes-rápidos-curl)
+- [Desenvolvimento local (opcional)](#️-desenvolvimento-local-opcional)
+- [Troubleshooting](#-troubleshooting)
+- [Segurança & boas práticas](#-segurança--boas-práticas)
+- [Licença](#-licença)
 
 ---
 
@@ -43,7 +43,7 @@ Este projeto implementa uma **gestão de usuários** com:
 - **Dashboard** com **KPIs** e **gráficos** (distribuição por **função/role** e por **status ativo/inativo**);
 - **Filtros independentes** via backend (endpoints dedicados) e **combinação de até 3 filtros no frontend** (interseção por `id`);
 - **API REST** documentada (Swagger/OpenAPI);
-- Infraestrutura **containerizada** com **Docker Compose**, sem instalar Java ou Postgres localmente.
+- Infraestrutura **containerizada** com **Docker Compose**; banco versionado por **Flyway**.
 
 ---
 
@@ -54,43 +54,44 @@ Mostra o caminho das requisições no **SPA** (Nginx), o **proxy para a API**, o
 
 ```mermaid
 flowchart LR
-  subgraph Client [Cliente];
-    UI[UI React - UsersList, UserFilters, UserForm, Dashboard];
+  subgraph Client [Cliente]
+    UI[UI React - UsersList, UserFilters, UserForm, Dashboard]
   end
 
-  subgraph Front [Frontend - Nginx SPA];
-    Nginx[Nginx serve SPA - Proxy api para backend 8080];
+  subgraph Front [Frontend - Nginx SPA]
+    Nginx[Nginx (serve SPA)\nProxy /api -> backend:8080/api]
   end
 
-  subgraph Back [Backend Spring Boot];
-    API1[Controllers api users];
-    SVC1[Services regras de negocio];
-    REPO1[Repositories Spring Data JPA];
+  subgraph Back [Backend Spring Boot]
+    API1[Controllers /api/users]
+    SVC1[Services (regras de negocio)]
+    REPO1[Repositories (Spring Data JPA)]
   end
 
-  subgraph DB [PostgreSQL 15];
-    USERS[Tabela USERS];
+  subgraph DB [PostgreSQL 16]
+    USERS[Tabela USERS]
+    FLYWAY[flyway_schema_history]
   end
 
-  UI --> Nginx;
-  Nginx --> API1;
-  API1 --> SVC1 --> REPO1 --> USERS;
+  UI -->|HTTP| Nginx
+  Nginx -->|/api| API1
+  API1 --> SVC1 --> REPO1 --> USERS
+  REPO1 -.migrações (db/migration).-> FLYWAY
 
-  subgraph FilterComb [Combinacao de filtros Front ate 3];
-    F1[Chamada 1: by-name ou by-email ou by-role ou by-active];
-    F2[Chamada 2 opcional];
-    F3[Chamada 3 opcional];
-    INT[Intersecao por id - intersectManyById];
+  subgraph FilterComb [Combinação de filtros no Front (até 3)]
+    F1[Chamada 1: /by-name ou /by-email ou /by-role ou /by-active]
+    F2[Chamada 2 (opcional)]
+    F3[Chamada 3 (opcional)]
+    INT[Interseção por id (intersectManyById)]
   end
 
-  UI --> F1;
-  UI --> F2;
-  UI --> F3;
-  F1 --> INT;
-  F2 --> INT;
-  F3 --> INT;
-  INT --> UI;
-
+  UI --> F1
+  UI --> F2
+  UI --> F3
+  F1 --> INT
+  F2 --> INT
+  F3 --> INT
+  INT --> UI
 ```
 
 ### Modelo ER do banco
@@ -105,49 +106,48 @@ erDiagram
         varchar role
         boolean active
         timestamp created_at
-        timestamp updated_at
     }
 ```
-> Observação: as estatísticas do dashboard (**por role** e **ativo/inativo**) são **consultas agregadas** em cima de `USERS` (não há tabelas adicionais obrigatórias).
+> Observação: as estatísticas do dashboard (**por role** e **ativo/inativo**) são **consultas agregadas** em cima de `USERS`.
 
 ---
 
 ## 🧑‍💻 Tecnologias & versões
 - **Java:** 17  
 - **Spring Boot:** 3.x (Web, Data JPA, Validation)  
-- **PostgreSQL:** 15  
+- **PostgreSQL:** 16  
+- **Flyway:** migrações em `backend/src/main/resources/db/migration`  
 - **React:** 18/19 (Vite + TypeScript, React Router)  
 - **Charts:** Recharts  
-- **Infra:** Docker, Docker Compose, **Nginx** (serve SPA e faz proxy `/api` → `backend:8080/api`)  
+- **Infra:** Docker, Docker Compose, **Nginx** (serve SPA e proxy `/api`)  
 - **Swagger:** SpringDoc OpenAPI
 
-> Ajuste as versões acima conforme seu `pom.xml` e `package.json`.
+> Ajuste as versões acima conforme `pom.xml` e `package.json`.
 
 ---
 
 ## 📁 Estrutura do repositório
 ```
 gestao-usuarios-dashboard/
-├─ db/
-│  └─ init.sql                     # seed inicial (se não usar Flyway)
 ├─ backend/                        # Spring Boot
 │  ├─ src/main/java/com/example/users/...
 │  ├─ src/main/resources/
-│  │  └─ application-docker.properties
+│  │  ├─ application-docker.properties
+│  │  └─ db/migration/            # << Flyway (V1__..., V2__...)
 │  └─ pom.xml
 ├─ frontend/                       # React + Vite + Nginx
 │  ├─ src/
 │  │  ├─ api/
 │  │  │  ├─ client.ts             # axios instanciado (baseURL)
-│  │  │  └─ userApi.ts            # ← chamadas HTTP centralizadas
+│  │  │  └─ userApi.ts            # chamadas HTTP centralizadas
 │  │  ├─ components/
-│  │  │  └─ UserFilters.tsx       # ← filtros (1 a 3) c/ interseção por id
+│  │  │  └─ UserFilters.tsx       # filtros (1 a 3) c/ interseção por id
 │  │  ├─ pages/
 │  │  │  ├─ UsersList.tsx
 │  │  │  ├─ UserForm.tsx
 │  │  │  └─ Dashboard.tsx
 │  │  ├─ utils/
-│  │  │  └─ intersect.ts          # ← intersectManyById
+│  │  │  └─ intersect.ts          # intersectManyById
 │  │  ├─ styles/
 │  │  │  ├─ user.css
 │  │  │  └─ dashboard.css
@@ -162,7 +162,7 @@ gestao-usuarios-dashboard/
 
 ## 🔹 Pré-requisitos
 - **Docker** e **Docker Compose** instalados.  
-- Não é necessário instalar Java, Node ou PostgreSQL localmente para rodar via Docker.
+- Não é necessário instalar Java/Node/PostgreSQL localmente para rodar via Docker.
 
 ---
 
@@ -170,12 +170,14 @@ gestao-usuarios-dashboard/
 Na **raiz** do projeto:
 
 ```bash
-docker compose up --build -d
+docker compose up -d --build
+# (ver logs do backend): docker compose logs -f backend
 ```
 
-> Para resetar o banco (apagar volume):
+> Para resetar o banco (apaga volume):
 > ```bash
 > docker compose down -v
+> docker compose up -d --build
 > ```
 
 Serviços:
@@ -185,7 +187,7 @@ Serviços:
 
 ---
 
-## URLs úteis
+## 🔗 URLs úteis
 - **Frontend (SPA):** http://localhost:3000  
 - **API (REST):** http://localhost:8080/api/users  
 - **Swagger:**  
@@ -196,38 +198,44 @@ Serviços:
 
 ## ⚙️ Configuração (compose, backend, proxy)
 
-### docker-compose.yml (resumo)
+### docker-compose.yml (pontos-chave)
 - `frontend` expõe **3000:80** (Nginx).
 - `backend` expõe **8080:8080** e roda com `SPRING_PROFILES_ACTIVE=docker`.
-- `db` expõe **5432:5432** e usa volume `db_data` + **healthcheck**:
+- `db` expõe **5432:5432** e usa volume `dbdata` + **healthcheck**:
   ```yaml
   healthcheck:
-    test: ["CMD", "pg_isready", "-U", "appuser", "-d", "appdb"]
+    test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
     interval: 5s
     timeout: 5s
-    retries: 20
+    retries: 10
   ```
 
 ### 🧰 Backend (`backend/src/main/resources/application-docker.properties`)
 ```properties
 spring.application.name=Users Backend
+server.port=8080
+
+# DataSource: lê env com fallback para 'db'
 spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/appdb}
 spring.datasource.username=${SPRING_DATASOURCE_USERNAME:appuser}
 spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:apppass}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA/Hibernate
 spring.jpa.hibernate.ddl-auto=none
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
 spring.jpa.show-sql=false
-spring.datasource.driver-class-name=org.postgresql.Driver
-server.port=8080
 
-# Swagger / OpenAPI (SpringDoc)
-springdoc.api-docs.enabled=true
-springdoc.swagger-ui.enabled=true
+# Flyway
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+# Se o schema já existia, habilite temporariamente:
+# spring.flyway.baseline-on-migrate=true
 ```
 
 ### 🌐 Frontend — proxy SPA (Nginx)
-`frontend/nginx.conf` contém fallback SPA e proxy de **`/api` → `backend:8080/api`**.  
-Isso evita problemas de CORS, pois o navegador acessa somente a mesma origem do **frontend** (`localhost:3000`).
+`frontend/nginx.conf` deve conter fallback SPA e proxy de **`/api` → `backend:8080/api`**.  
+Assim, do navegador você usa **`/api`** (same‑origin), evitando CORS.
 
 ---
 
@@ -249,7 +257,7 @@ Isso evita problemas de CORS, pois o navegador acessa somente a mesma origem do 
 | PUT   | `/api/users/{id}`      | Atualiza usuário                        |
 | PATCH | `/api/users/{id}`      | Atualiza parcial                        |
 | DELETE| `/api/users/{id}`      | Remove usuário                          |
-| GET   | `/api/users/stats`     | Estatísticas (dashboard/gráficos)       |
+| GET   | `/api/users/statistics`| Estatísticas (dashboard/gráficos)       |
 | GET   | `/api/users/by-name`   | Filtro por **nome** (não combinado)     |
 | GET   | `/api/users/by-email`  | Filtro por **e-mail** (não combinado)   |
 | GET   | `/api/users/by-role`   | Filtro por **função/role** (não comb.)  |
@@ -278,21 +286,19 @@ Isso evita problemas de CORS, pois o navegador acessa somente a mesma origem do 
 ## 🧪 Testes rápidos (curl)
 ```bash
 # listar
-curl http://localhost:8080/api/users
+curl -s http://localhost:8080/api/users | jq
 
 # criar
-curl -X POST http://localhost:8080/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Ana","email":"ana@example.com","role":"user","active":true}'
+curl -s -X POST http://localhost:8080/api/users   -H "Content-Type: application/json"   -d '{"name":"Ana","email":"ana@example.com","role":"user","active":true}' | jq
 
 # estatísticas
-curl http://localhost:8080/api/users/stats
+curl -s http://localhost:8080/api/users/statistics | jq
 
-# filtro por nome (atenção ao espaço: encode %20)
-curl "http://localhost:8080/api/users/by-name?name=Gabriel%20Alves"
+# filtro por nome
+curl -s "http://localhost:8080/api/users/by-name?name=Gabriel%20Alves" | jq
 
-# filtro por e-mail (caracter @ precisa de encode %40 se escrever na URL crua)
-curl "http://localhost:8080/api/users/by-email?email=gabriel%40empresa.com"
+# filtro por e-mail
+curl -s "http://localhost:8080/api/users/by-email?email=gabriel%40empresa.com" | jq
 ```
 
 ---
@@ -324,9 +330,10 @@ npm run dev
   location / { try_files $uri /index.html; }
   ```
 - **Frontend sem dados** → garanta proxy `/api` no Nginx e o `baseURL` do Axios (`/api` no Docker, `VITE_API_BASE_URL` no dev).
-- **CORS no navegador** → use sempre `/api` (same-origin via Nginx).
-- **Postgres ainda não pronto** → use o **healthcheck** do compose para evitar corrida.
+- **CORS no navegador** → use sempre `/api` (same‑origin via Nginx).
+- **Postgres ainda não pronto** → healthcheck no compose (vide exemplo).
 - **Swagger não abre** → verifique a URL conforme a versão do SpringDoc e a dependência no `pom.xml`.
+- **Flyway “Unsupported Database”** → adicione `flyway-core` **+** `flyway-database-postgresql` (mesma versão).
 
 ---
 
@@ -335,13 +342,13 @@ npm run dev
 - Validar input na API (Bean Validation) e padronizar erros.
 - Logs úteis em produção (sem dados sensíveis).
 - Camadas no backend bem separadas (Controller, Service, Repository).
-- No frontend, centralizar requisições em **`src/api/userApi.ts`**.
+- No frontend, centralizar requisições em **src/api/userApi.ts**.
 - Componentes reutilizáveis: **UserFilters**, tabela, cards, charts.
-- Interseção de filtros no cliente com **`intersectManyById`**.
+- Interseção de filtros no cliente com **intersectManyById**.
 
 ---
 
 ## 📄 Licença
 
-Este projeto está sob a licença [MIT](LICENSE) </br>
+Este projeto está sob a licença [MIT](LICENSE). </br>
 Criado por **Gabriel Alves Varella da Costa**.
