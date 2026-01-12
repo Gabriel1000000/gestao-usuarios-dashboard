@@ -1,5 +1,7 @@
 package com.example.users.dto;
 
+import com.example.users.model.SystemRole;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Email;
@@ -22,9 +24,13 @@ public class UserDto {
     @Email(message = "Invalid email format")
     @Size(max = 200, message = "Email must be at most 200 characters")
     private String email;
-    @NotBlank(message = "Role is required")
-    @Size(max = 50, message = "Role must be at most 50 characters")
-    private String role;
+
+    @NotBlank(message = "Job title is required")
+    @Size(max = 80, message = "Job title must be at most 80 characters")
+    private String jobTitle;
+
+    @NotNull(message = "System role is required")
+    private SystemRole systemRole;
 
     private Boolean active;
 }
