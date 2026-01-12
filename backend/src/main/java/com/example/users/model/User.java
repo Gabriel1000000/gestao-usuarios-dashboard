@@ -24,12 +24,19 @@ public class User {
     @Column(nullable = false, unique = true, length = 200)
     private String email;
 
-    @Column(nullable = false, length = 50)
-    private String role;
+    @Column(nullable = false, length = 80)
+    private String jobTitle;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private SystemRole systemRole = SystemRole.USER;
 
     @Column(nullable = false)
     private Boolean active = true;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }
