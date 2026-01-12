@@ -1,15 +1,15 @@
 package com.example.users.controller;
 
 import com.example.users.dto.UserDto;
-import com.example.users.service.UserService;
 import com.example.users.model.SystemRole;
-
+import com.example.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -24,91 +24,65 @@ public class UserController {
         this.service = service;
     }
 
-    @Operation(summary = "Lista todos os usuários", description = "Retorna uma lista de todos os usuários cadastrados no sistema.")
+    @Operation(
+            summary = "Lista usuários (com filtros opcionais e combináveis)",
+            description = "Retorna todos os usuários ou aplica filtros combinados via query params."
+    )
     @GetMapping
-    public List<UserDto> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<UserDto>> getAll(
+            @Parameter(description = "Filtro por nome (contém, case-insensitive). Ex: gab")
+            @RequestParam(required = false) String name,
+
+            @Parameter(description = "Filtro por e-mail (contém, case-insensitive). Ex: @gmail")
+            @RequestParam(required = false) String email,
+
+            @Parameter(description = "Filtro por cargo/profissão (igual, case-insensitive). Ex: DESENVOLVEDOR")
+            @RequestParam(required = false) String jobTitle,
+
+            @Parameter(description = "Filtro por perfil de acesso (ADMIN, MANAGER, USER)")
+            @RequestParam(required = false) SystemRole systemRole,
+
+            @Parameter(description = "Filtro por status ativo/inativo")
+            @RequestParam(required = false) Boolean active
+    ) {
+        return ResponseEntity.ok(service.search(name, email, jobTitle, systemRole, active));
     }
 
-    @Operation(summary = "Detalhes do usuário", description = "Retorna os detalhes de um usuário específico com base no ID fornecido.")
+    @Operation(summary = "Detalhes do usuário", description = "Retorna os detalhes de um usuário específico com base no ID.")
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    @Operation(summary = "Cria um novo usuário", description = "Adiciona um novo usuário ao sistema com os dados fornecidos.")
+    @Operation(summary = "Cria um novo usuário", description = "Adiciona um novo usuário ao sistema.")
     @PostMapping
     public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto dto) {
         UserDto created = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
-
     }
 
-    @Operation(summary = "Atualiza um usuário", description = "Atualiza os dados do usuário com base no ID fornecido.")
+    @Operation(summary = "Atualiza um usuário", description = "Atualiza os dados do usuário com base no ID.")
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> update(@PathVariable Long id, @Valid @RequestBody UserDto dto) {
-        UserDto updated = service.update(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @Operation(summary = "Deleta um usuário", description = "Remove o usuário do sistema com base no ID fornecido.")
+    @Operation(summary = "Deleta um usuário", description = "Remove o usuário do sistema com base no ID.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Atualiza parcialmente os dados do usuário", description = "Realiza a atualização parcial dos dados do usuário, ou seja, pode enviar apenas os campos que deseja atualizar.")
+    @Operation(summary = "Atualiza parcialmente um usuário", description = "Atualiza apenas os campos enviados no body.")
     @PatchMapping("/{id}")
     public ResponseEntity<UserDto> patch(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        UserDto updated = service.patch(id, updates);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(service.patch(id, updates));
     }
 
-    @Operation(summary = "Estatísticas dos usuários", description = "Retorna estatísticas sobre os usuários cadastrados, como total de usuários, ativos, inativos e distribuição por função.")
+    @Operation(summary = "Estatísticas dos usuários", description = "Distribuição por jobTitle, systemRole e status ativo/inativo.")
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         return ResponseEntity.ok(service.getStats());
-    }
-
-    
-    // --- Filtros independentes (não combinados) ---
-
-    @Operation(summary = "Buscar usuários pelo nome (não combinado)")
-    @GetMapping("/by-name")
-    public ResponseEntity<List<UserDto>> findByName(@RequestParam String name) {
-        return ResponseEntity.ok(service.findByName(name));
-    }
-
-    @Operation(summary = "Buscar usuários pelo e-mail (não combinado)")
-    @GetMapping("/by-email")
-    public ResponseEntity<List<UserDto>> findByEmail(@RequestParam String email) {
-        return ResponseEntity.ok(service.findByEmailLike(email));
-    }
-
-    @Operation(summary = "Buscar usuários pela função (não combinado)")
-    @GetMapping("/by-role")
-    public ResponseEntity<List<UserDto>> findByRole(@RequestParam String role) {
-        return ResponseEntity.ok(service.findByRoleExactly(role));
-    }
-
-    // NOVO endpoint correto: cargo/profissão
-    @Operation(summary = "Buscar usuários pelo cargo/profissão (jobTitle) (não combinado)")
-    @GetMapping("/by-job-title")
-    public ResponseEntity<List<UserDto>> findByJobTitle(@RequestParam String jobTitle) {
-        return ResponseEntity.ok(service.findByJobTitleExactly(jobTitle));
-    }
-
-    // NOVO endpoint correto: perfil de acesso (RBAC)
-    @Operation(summary = "Buscar usuários pelo perfil de acesso (systemRole) (não combinado)")
-    @GetMapping("/by-system-role")
-    public ResponseEntity<List<UserDto>> findBySystemRole(@RequestParam SystemRole systemRole) {
-        return ResponseEntity.ok(service.findBySystemRole(systemRole));
-    }
-
-    @Operation(summary = "Buscar usuários por status ativo/inativo (não combinado)")
-    @GetMapping("/by-active")
-    public ResponseEntity<List<UserDto>> findByActive(@RequestParam Boolean active) {
-        return ResponseEntity.ok(service.findByActive(active));
     }
 }
