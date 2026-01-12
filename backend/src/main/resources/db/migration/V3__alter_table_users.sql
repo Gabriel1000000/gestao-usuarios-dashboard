@@ -1,0 +1,11 @@
+ALTER TABLE users RENAME COLUMN role TO job_title;
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS system_role VARCHAR(20) NOT NULL DEFAULT 'USER';
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+
+-- Se quiser garantir created_at default:
+ALTER TABLE users
+  ALTER COLUMN created_at SET DEFAULT NOW();
