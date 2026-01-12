@@ -2,6 +2,7 @@ package com.example.users.controller;
 
 import com.example.users.dto.UserDto;
 import com.example.users.service.UserService;
+import com.example.users.model.SystemRole;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -72,6 +73,7 @@ public class UserController {
 
     
     // --- Filtros independentes (não combinados) ---
+
     @Operation(summary = "Buscar usuários pelo nome (não combinado)")
     @GetMapping("/by-name")
     public ResponseEntity<List<UserDto>> findByName(@RequestParam String name) {
@@ -88,6 +90,20 @@ public class UserController {
     @GetMapping("/by-role")
     public ResponseEntity<List<UserDto>> findByRole(@RequestParam String role) {
         return ResponseEntity.ok(service.findByRoleExactly(role));
+    }
+
+    // NOVO endpoint correto: cargo/profissão
+    @Operation(summary = "Buscar usuários pelo cargo/profissão (jobTitle) (não combinado)")
+    @GetMapping("/by-job-title")
+    public ResponseEntity<List<UserDto>> findByJobTitle(@RequestParam String jobTitle) {
+        return ResponseEntity.ok(service.findByJobTitleExactly(jobTitle));
+    }
+
+    // NOVO endpoint correto: perfil de acesso (RBAC)
+    @Operation(summary = "Buscar usuários pelo perfil de acesso (systemRole) (não combinado)")
+    @GetMapping("/by-system-role")
+    public ResponseEntity<List<UserDto>> findBySystemRole(@RequestParam SystemRole systemRole) {
+        return ResponseEntity.ok(service.findBySystemRole(systemRole));
     }
 
     @Operation(summary = "Buscar usuários por status ativo/inativo (não combinado)")
