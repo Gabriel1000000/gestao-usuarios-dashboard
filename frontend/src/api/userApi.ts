@@ -1,32 +1,30 @@
 // src/api/userApi.ts
 import { api } from './client'
-import { StatsResponse, User } from '../types'
+import { StatsResponse, User, UserFilters } from '../types'
 
-// LISTAGEM
-export const listAll = async () => {
-  const r = await api.get<User[]>('/users')
-  return r.data
-}
+// BUSCA COM FILTROS COMBINADOS (endpoint novo)
+export const searchUsers = async (filters: UserFilters) => {
+  // normaliza para não mandar string vazia
+  const params: Record<string, any> = {}
 
-// FILTROS
-export const getByName = async (name: string) => {
-  const r = await api.get<User[]>('/users/by-name', { params: { name } })
-  return r.data
-}
-export const getByEmail = async (email: string) => {
-  const r = await api.get<User[]>('/users/by-email', { params: { email } })
-  return r.data
-}
-export const getByRole = async (role: string) => {
-  const r = await api.get<User[]>('/users/by-role', { params: { role } })
-  return r.data
-}
-export const getByActive = async (active: boolean) => {
-  const r = await api.get<User[]>('/users/by-active', { params: { active } })
+  if (filters.name?.trim()) params.name = filters.name.trim()
+  if (filters.email?.trim()) params.email = filters.email.trim()
+  if (filters.jobTitle?.trim()) params.jobTitle = filters.jobTitle.trim()
+  if (filters.systemRole) params.systemRole = filters.systemRole
+  if (filters.active !== undefined) params.active = filters.active
+
+  const r = await api.get<User[]>('/users', { params })
   return r.data
 }
 
-// CRUD
+// LISTAGEM
+export const listAll = async () => searchUsers({})
+
+// (opcional) manter antigos como "alias" temporário:
+// export const getByName = async (name: string) => searchUsers({ name })
+// export const getByEmail = async (email: string) => searchUsers({ email })
+// export const getByActive = async (active: boolean) => searchUsers({ active })
+
 export const removeUser = async (id: number) => {
   await api.delete(`/users/${id}`)
 }
@@ -51,8 +49,8 @@ export const updateUser = async (id: string | number, data: Partial<User>) => {
   return r.data
 }
 
-// (opcional) caso use PATCH em algum lugar
 export const patchUser = async (id: string | number, updates: Partial<User>) => {
   const r = await api.patch<User>(`/users/${id}`, updates)
   return r.data
 }
+
