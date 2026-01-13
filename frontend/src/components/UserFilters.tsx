@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { User } from '../types'
-import { getByName, getByEmail, getByRole, getByActive, listAll } from '../api/userApi'
-import { intersectManyById } from '../utils/intersect'
+import { User, SystemRole } from '../types'
+import { listAll, searchUsers } from '../api/userApi'
 import '../styles/user.css'
 
 type Props = {
@@ -12,75 +11,52 @@ type Props = {
 export default function UserFilters({ onResults, onResetAll }: Props) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState('')
+  const [jobTitle, setJobTitle] = useState('')
+  const [systemRole, setSystemRole] = useState<SystemRole | ''>('')
   const [status, setStatus] = useState('') // "true" | "false" | ""
 
   const reset = async () => {
     setName('')
     setEmail('')
-    setRole('')
+    setJobTitle('')
+    setSystemRole('')
     setStatus('')
 
-    if (onResetAll) {
-      await onResetAll()
-    } else {
-      onResults(await listAll())
-    }
+    if (onResetAll) await onResetAll()
+    else onResults(await listAll())
   }
 
   const handleSearch = async () => {
-    const filters = {
-      name: name.trim(),
-      email: email.trim(),
-      role: role.trim(),
-      status: status.trim(),
-    }
+    const active =
+      status === '' ? undefined : status === 'true'
 
-    const active = Object.entries(filters).filter(([, v]) => v !== '')
-    if (active.length === 0) {
-      onResults(await listAll())
-      return
-    }
-    if (active.length > 3) {
-      alert('Selecione no máximo 3 filtros.')
-      return
-    }
-
-    const calls: Promise<User[]>[] = active.map(([k, v]) => {
-      if (k === 'name')   return getByName(String(v))
-      if (k === 'email')  return getByEmail(String(v))
-      if (k === 'role')   return getByRole(String(v))
-      if (k === 'status') return getByActive(v === 'true')
-      return Promise.resolve<User[]>([])
+    const data = await searchUsers({
+      name: name.trim() || undefined,
+      email: email.trim() || undefined,
+      jobTitle: jobTitle.trim() || undefined,
+      systemRole: systemRole || undefined,
+      active
     })
 
-    const results = await Promise.all(calls)
-    const final = intersectManyById(results) 
-    onResults(final)
+    onResults(data)
   }
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
-        <input
-          className="input"
-          placeholder="Nome"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <input
-          className="input"
-          placeholder="E-mail"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        <select className="select" value={role} onChange={e => setRole(e.target.value)}>
-          <option value="">Função</option>
-          <option value="admin">admin</option>
-          <option value="user">user</option>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
+        <input className="input" placeholder="Nome" value={name} onChange={e => setName(e.target.value)} />
+        <input className="input" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
+        <input className="input" placeholder="Cargo/Profissão" value={jobTitle} onChange={e => setJobTitle(e.target.value)} />
+
+        <select className="select" value={systemRole} onChange={e => setSystemRole(e.target.value as any)}>
+          <option value="">Perfil (todos)</option>
+          <option value="ADMIN">ADMIN</option>
+          <option value="MANAGER">MANAGER</option>
+          <option value="USER">USER</option>
         </select>
+
         <select className="select" value={status} onChange={e => setStatus(e.target.value)}>
-          <option value="">Status</option>
+          <option value="">Status (todos)</option>
           <option value="true">Ativo</option>
           <option value="false">Inativo</option>
         </select>
@@ -90,10 +66,6 @@ export default function UserFilters({ onResults, onResetAll }: Props) {
         <button className="btn" onClick={handleSearch}>Buscar</button>
         <button className="btn secondary" onClick={reset}>Limpar</button>
       </div>
-
-      <small style={{ color: '#888' }}>
-        Use 1 filtro ou combine até <strong>3</strong>.
-      </small>
     </div>
   )
 }
