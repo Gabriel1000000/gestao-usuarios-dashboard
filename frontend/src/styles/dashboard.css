@@ -1,61 +1,130 @@
-/* ================================
-   DASHBOARD PAGE STYLES
-   ================================ */
+/* =========================
+   Dashboard layout
+   ========================= */
 
-/* Grid principal que organiza os cards e gráficos */
 .dashboard-grid {
+  width: 100%;
+  max-width: 1200px; /* Desktop: centraliza e limita */
+  margin: 0 auto;
+  padding: 16px;
+
   display: grid;
-  gap: 24px;
-  margin-top: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  box-sizing: border-box;
 }
 
-/* Em telas grandes, os gráficos ficam lado a lado */
-@media (min-width: 900px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Cada gráfico ou bloco do dashboard */
+/* Cards */
+.summary-card,
 .chart-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  min-height: 340px;
+  width: 100%;
+  min-width: 0; /* CRÍTICO: permite encolher no grid */
+  border-radius: 14px;
+  padding: 14px 14px 16px;
+  box-sizing: border-box;
+
+  /* Ajuste conforme seu tema */
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.chart-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-}
-
-/* Título dos gráficos */
+/* Títulos */
+.summary-card h2,
 .chart-card h3 {
-  margin-bottom: 16px;
-  font-size: 1.1rem;
-  color: var(--text);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 6px;
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.2;
 }
 
-/* Card de resumo geral */
-.summary-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-}
-
-.summary-card h2 {
-  font-size: 1.3rem;
-  margin-bottom: 8px;
+/* Texto do resumo */
+.summary-card p {
+  margin: 6px 0;
+  font-size: 14px;
+  opacity: 0.95;
 }
 
 .summary-card strong {
-  color: var(--primary);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+/* Legenda externa (fora do SVG) */
+.chart-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 10px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.chart-legend-label {
+  color: #fff;
+  opacity: 0.95;
+}
+
+/* Garantia de texto branco para ticks */
+.recharts-wrapper text,
+.recharts-cartesian-axis-tick text {
+  fill: #ffffff !important;
+}
+
+
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    /* CRÍTICO: tira limitação que deixa “espremido no centro” */
+    max-width: none;
+    margin: 0;
+    padding: 12px;
+
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-card,
+  .chart-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .summary-card h2,
+  .chart-card h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .summary-card p {
+    font-size: 13px;
+  }
+}
+
+/* =========================
+   (Opcional) Se você quiser usar uma classe para scroll no gráfico
+   ========================= */
+.chart-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
