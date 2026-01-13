@@ -7,11 +7,12 @@ import { isAxiosError } from 'axios'
 import { getUser, createUser, updateUser } from '../api/userApi'
 import '../styles/newser.css'
 
-// Schema com saída garantida (active sempre boolean)
+// Alinhado ao backend: jobTitle (cargo/profissão) + systemRole (RBAC)
 const schema = z.object({
   name: z.string().min(2, 'Informe o nome'),
   email: z.string().email('Email inválido'),
-  role: z.string().min(2, 'Informe a função'),
+  jobTitle: z.string().min(2, 'Informe o cargo/profissão'),
+  systemRole: z.enum(['ADMIN', 'MANAGER', 'USER'], { message: 'Selecione um perfil válido' }),
   active: z.coerce.boolean().default(true),
 })
 type FormData = z.output<typeof schema>
@@ -33,18 +34,21 @@ export default function UserForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver,
-    defaultValues: { name: '', email: '', role: '', active: true },
+    defaultValues: { name: '', email: '', jobTitle: '', systemRole: 'USER', active: true },
   })
 
   // carregar para edição
   useEffect(() => {
     if (!id) return
-    getUser(id).then(u => {
+    getUser(id)
+      .then((u) => {
         setValue('name', u.name)
         setValue('email', u.email)
-        setValue('role', u.role)
+        setValue('jobTitle', u.jobTitle)
+        setValue('systemRole', u.systemRole)
         setValue('active', !!u.active)
-      }).catch((e) => {
+      })
+      .catch((e) => {
         console.error(e)
         setApiError('Falha ao carregar usuário.')
       })
@@ -79,6 +83,10 @@ export default function UserForm() {
             const msg = String(payload['message'])
             if (/email/i.test(msg)) {
               setError('email', { type: 'server', message: msg })
+            } else if (/systemrole/i.test(msg)) {
+              setError('systemRole', { type: 'server', message: msg })
+            } else if (/jobtitle|cargo|profiss/i.test(msg)) {
+              setError('jobTitle', { type: 'server', message: msg })
             } else {
               setApiError(msg)
             }
@@ -127,13 +135,19 @@ export default function UserForm() {
         </div>
 
         <div>
-          <label>Função</label>
-          <select className="select" {...register('role')}>
-            <option value="">Selecione…</option>
-            <option value="admin">admin</option>
-            <option value="user">user</option>
+          <label>Cargo/Profissão</label>
+          <input className="input" {...register('jobTitle')} />
+          {errors.jobTitle && <small>{errors.jobTitle.message}</small>}
+        </div>
+
+        <div>
+          <label>Perfil de acesso</label>
+          <select className="select" {...register('systemRole')}>
+            <option value="USER">USER</option>
+            <option value="MANAGER">MANAGER</option>
+            <option value="ADMIN">ADMIN</option>
           </select>
-          {errors.role && <small>{errors.role.message}</small>}
+          {errors.systemRole && <small>{errors.systemRole.message}</small>}
         </div>
 
         <div>
