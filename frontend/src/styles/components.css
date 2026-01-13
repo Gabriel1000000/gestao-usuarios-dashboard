@@ -56,3 +56,32 @@
   display: flex; 
   gap: 8px; 
 }
+
+
+
+
+/* Filters (UsersList) */
+.users-filters {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+  .users-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .users-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+.users-filters-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
