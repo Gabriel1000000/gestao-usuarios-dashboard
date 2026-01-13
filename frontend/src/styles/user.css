@@ -1,107 +1,322 @@
-/* UsersList page-specific */
+/* =========================
+   UsersList - layout base
+   ========================= */
+
+.users-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+
 .users-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
 .users-empty {
   text-align: center;
-  color: var(--muted, #6b7280);
+  color: rgba(255, 255, 255, 0.7);
   padding: 16px 0;
 }
 
-/* ----- TABELA (desktop & tablets) ----- */
+/* =========================
+   Filtros (painel suspenso)
+   ========================= */
+
+.filters {
+  margin: 12px 0 14px;
+}
+
+.filters-toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
+  cursor: pointer;
+  user-select: none;
+}
+
+.filters-toggle__title {
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.2px;
+}
+
+.filters-toggle__meta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+}
+
+.filters-toggle__chev {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.filters-panel {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Grid que funciona bem em desktop e mobile automaticamente */
+.filters-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.filters-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.filters-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.filters-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* =========================
+   Tabela (desktop/tablets)
+   ========================= */
+
 .table-responsive {
   width: 100%;
-  overflow-x: auto; /* evita quebra em telas intermediárias */
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* scrollbar discreta */
+.table-responsive::-webkit-scrollbar {
+  height: 10px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+.table-responsive::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  min-width: 860px;
 }
 
-.table th,
+.table thead th {
+  text-align: left;
+  padding: 12px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
 .table td {
   text-align: left;
   padding: 12px 10px;
-  border-bottom: 1px solid rgba(0,0,0,.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   vertical-align: middle;
+  color: rgba(255, 255, 255, 0.90);
 }
 
+/* Hover para leitura */
+.table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* evita estourar email em telas menores */
+.table td:nth-child(2) {
+  max-width: 340px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ações: não quebrar e manter consistente */
 .row-actions {
   display: inline-flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
-/* badges */
+/* =========================
+   Badges
+   ========================= */
+
 .badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 12px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
-  line-height: 1;
+  line-height: 18px;
+  font-weight: 700;
+  white-space: nowrap;
 }
+
 .badge-ok {
-  background: #e6f9f1;
-  color: #10b981;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #d1fae5;
 }
+
 .badge-muted {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: rgba(184, 148, 148, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
 }
 
-/* buttons */
-.btn-block { width: 100%; }
+.badge-danger {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+}
 
-/* ----- CARDS (mobile) ----- */
+/* =========================
+   Botões auxiliares
+   ========================= */
+
+.btn-block {
+  width: 100%;
+}
+
+/* =========================
+   Cards (mobile)
+   ========================= */
+
 .users-cards {
   display: none; /* só aparece no mobile */
 }
 
 .user-card {
-  background: var(--card, #fff);
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
+
 .user-card__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 10px;
 }
+
 .user-card__title {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1.25;
+  color: #fff;
 }
+
 .user-card__body p {
-  margin: 4px 0;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  line-height: 1.35;
 }
+
+/* evita e-mail estourar no card */
+.user-card__body p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .user-card__footer {
   display: grid;
   gap: 8px;
 }
 
-/* ----- RESPONSIVIDADE ----- */
+/* =========================
+   Responsividade
+   ========================= */
+
 @media (max-width: 768px) {
+  .users-page {
+    max-width: none;
+  }
+
+  .users-header {
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  /* filtros: toggle reorganiza */
+  .filters-toggle {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "title chev"
+      "meta  meta";
+  }
+
+  .filters-toggle__title {
+    grid-area: title;
+  }
+  .filters-toggle__chev {
+    grid-area: chev;
+    justify-self: end;
+  }
+  .filters-toggle__meta {
+    grid-area: meta;
+  }
+
+  /* ações viram 2 botões grandes */
+  .filters-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .filters-actions .btn {
+    width: 100%;
+  }
+
   /* esconde tabela, mostra cards */
-  .users-table-wrap { display: none; }
+  .users-table-wrap {
+    display: none;
+  }
+
   .users-cards {
     display: grid;
     gap: 12px;
     grid-template-columns: 1fr;
   }
 
-  .users-header { margin-bottom: 10px; }
-}
-
-/* largura máxima p/ centralizar em telas grandes */
-.users-page {
-  max-width: 1100px;
-  margin: 0 auto;
+  /* botões ficam mais confortáveis no mobile */
+  .user-card__footer .btn {
+    padding: 10px 12px;
+  }
 }
