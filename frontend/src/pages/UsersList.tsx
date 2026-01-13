@@ -14,7 +14,9 @@ export default function UsersList() {
     setUsers(data)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+  }, [])
 
   const onDelete = async (id?: number) => {
     if (!id) return
@@ -27,7 +29,9 @@ export default function UsersList() {
     <div className="card users-page">
       <div className="users-header">
         <h2>Usuários</h2>
-        <Link to="/users/new" className="btn">Novo Usuário</Link>
+        <Link to="/users/new" className="btn">
+          Novo Usuário
+        </Link>
       </div>
 
       {/* filtros (mantém sua lógica de onResults/onResetAll) */}
@@ -38,28 +42,39 @@ export default function UsersList() {
       ) : (
         <>
           {/* TABELA (desktop / tablets) */}
-          <div className="table-responsive users-table-wrap" role="region" aria-label="Tabela de usuários" tabIndex={0}>
+          <div
+            className="table-responsive users-table-wrap"
+            role="region"
+            aria-label="Tabela de usuários"
+            tabIndex={0}
+          >
             <table className="table users-table">
               <thead>
                 <tr>
                   <th>Nome</th>
                   <th>Email</th>
-                  <th>Função</th>
-                  <th>Ativo</th>
+                  <th>Cargo</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map(u => (
+                {users.map((u) => (
                   <tr key={u.id}>
                     <td>{u.name}</td>
                     <td>{u.email}</td>
-                    <td>{u.role}</td>
-                    <td>{u.active ? 'Sim' : 'Não'}</td>
+                    <td>{u.jobTitle}</td>
+                    <td>{u.systemRole}</td>
+                    <td>{u.active ? 'Ativo' : 'Inativo'}</td>
                     <td>
                       <div className="row-actions">
-                        <button className="btn secondary" onClick={() => nav(`/users/${u.id}`)}>Editar</button>
-                        <button className="btn danger" onClick={() => onDelete(u.id)}>Excluir</button>
+                        <button className="btn secondary" onClick={() => nav(`/users/${u.id}`)}>
+                          Editar
+                        </button>
+                        <button className="btn danger" onClick={() => onDelete(u.id)}>
+                          Excluir
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -70,7 +85,7 @@ export default function UsersList() {
 
           {/* CARDS (mobile) */}
           <div className="users-cards" aria-label="Lista de usuários (cards)">
-            {users.map(u => (
+            {users.map((u) => (
               <article className="user-card" key={u.id}>
                 <header className="user-card__header">
                   <h3 className="user-card__title">{u.name}</h3>
@@ -78,13 +93,26 @@ export default function UsersList() {
                     {u.active ? 'Ativo' : 'Inativo'}
                   </span>
                 </header>
+
                 <div className="user-card__body">
-                  <p><strong>E-mail:</strong> {u.email}</p>
-                  <p><strong>Função:</strong> {u.role}</p>
+                  <p>
+                    <strong>E-mail:</strong> {u.email}
+                  </p>
+                  <p>
+                    <strong>Cargo:</strong> {u.jobTitle}
+                  </p>
+                  <p>
+                    <strong>Perfil:</strong> {u.systemRole}
+                  </p>
                 </div>
+
                 <footer className="user-card__footer">
-                  <button className="btn secondary btn-block" onClick={() => nav(`/users/${u.id}`)}>Editar</button>
-                  <button className="btn danger btn-block" onClick={() => onDelete(u.id)}>Excluir</button>
+                  <button className="btn secondary btn-block" onClick={() => nav(`/users/${u.id}`)}>
+                    Editar
+                  </button>
+                  <button className="btn danger btn-block" onClick={() => onDelete(u.id)}>
+                    Excluir
+                  </button>
                 </footer>
               </article>
             ))}
