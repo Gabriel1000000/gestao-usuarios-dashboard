@@ -66,7 +66,9 @@ export default function UsersList() {
                     <td>{u.email}</td>
                     <td>{u.jobTitle}</td>
                     <td>{u.systemRole}</td>
-                    <td>{u.active ? 'Ativo' : 'Inativo'}</td>
+                    <td><span className={`badge ${u.active ? 'badge-ok' : 'badge-danger'}`}>
+                        {u.active ? 'Ativo' : 'Inativo'}
+                      </span></td>
                     <td>
                       <div className="row-actions">
                         <button className="btn secondary" onClick={() => nav(`/users/${u.id}`)}>
@@ -89,7 +91,7 @@ export default function UsersList() {
               <article className="user-card" key={u.id}>
                 <header className="user-card__header">
                   <h3 className="user-card__title">{u.name}</h3>
-                  <span className={`badge ${u.active ? 'badge-ok' : 'badge-muted'}`}>
+                  <span className={`badge ${u.active ? 'badge-ok' : 'badge-danger'}`}>
                     {u.active ? 'Ativo' : 'Inativo'}
                   </span>
                 </header>
