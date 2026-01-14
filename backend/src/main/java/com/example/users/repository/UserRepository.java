@@ -31,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 
-    // Stats (mantém como você já tem)
+    // Stats
     @Query("SELECT u.jobTitle, COUNT(u) FROM User u GROUP BY u.jobTitle")
     List<Object[]> countByJobTitle();
 
