@@ -1,39 +1,133 @@
 /* Navbar */
 .navbar {
-  position: sticky; 
-  top: 0; 
+  position: sticky;
+  top: 0;
   z-index: 10;
-  display: flex; 
-  align-items: center; 
+
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
+
   padding: 12px 16px;
-  background: #0f121aee; 
+  background: #0f121aee;
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--border);
+
+  /* necessário pro dropdown ficar alinhado ao navbar */
+  box-sizing: border-box;
 }
 
-.navbar-brand { 
-  font-weight: 700; 
-  letter-spacing: .3px; 
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.navbar-links { 
-  display: flex; 
-  gap: 8px; 
-}
-
+/* Links base */
 .nav-link {
   padding: 8px 10px;
   border-bottom: 2px solid transparent;
   border-radius: 6px 6px 0 0;
+  text-decoration: none;
+  color: inherit;
 }
 
-.nav-link:hover { 
-  background: #151a22; 
-  border-bottom-color: #2f3950; 
+.nav-link:hover {
+  background: #151a22;
+  border-bottom-color: #2f3950;
 }
 
-.nav-link.active { 
-  border-bottom-color: var(--primary); 
-  font-weight: 600; 
+.nav-link.active {
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Desktop links */
+.navbar-links {
+  display: flex;
+  gap: 8px;
+}
+
+/* Toggle (hamburger/X) */
+.navbar-toggle {
+  display: none; /* aparece só no mobile */
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+
+  color: #fff;
+  cursor: pointer;
+}
+
+.navbar-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navbar-toggle i {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* Mobile dropdown container */
+.navbar-mobile {
+  display: none;
+}
+
+/* =========================
+   Mobile
+   ========================= */
+@media (max-width: 768px) {
+  /* esconde links desktop */
+  .navbar-links--desktop {
+    display: none;
+  }
+
+  /* mostra botão */
+  .navbar-toggle {
+    display: inline-flex;
+  }
+
+  /* dropdown */
+  .navbar-mobile {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 16px;
+
+    width: min(240px, calc(100vw - 32px));
+    padding: 10px;
+
+    background: #0f121a;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .navbar-mobile.is-open {
+    display: grid;
+    gap: 6px;
+  }
+
+  /* links no dropdown: estilo de “botão” */
+  .navbar-mobile .nav-link {
+    border-radius: 10px;
+    border-bottom: 0;
+    padding: 10px 12px;
+  }
+
+  .navbar-mobile .nav-link:hover {
+    border-bottom: 0;
+  }
+
+  .navbar-mobile .nav-link.active {
+    border-bottom: 0;
+    outline: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
