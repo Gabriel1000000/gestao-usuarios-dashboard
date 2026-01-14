@@ -32,7 +32,7 @@ function useIsMobile(breakpoint = 768) {
 
 function truncateLabel(value: string, maxChars: number) {
   if (!value) return ''
-  return value.length > maxChars ? `${value.slice(0, maxChars - 1)}…` : value
+  return value.length > maxChars ? `${value.slice(0, Math.max(0, maxChars - 1))}…` : value
 }
 
 function CustomXAxisTick(props: any) {
@@ -88,18 +88,24 @@ function ChartLegend({ items }: { items: Array<{ label: string; color: string }>
   return (
     <div className="chart-legend" aria-label="Legenda do gráfico">
       {items.map((it) => (
-        <div className="chart-legend-item" key={it.label}>
+        <div className="chart-legend-item" key={`${it.label}-${it.color}`}>
           <span className="chart-legend-swatch" style={{ backgroundColor: it.color }} />
-          <span className="chart-legend-label">{it.label}</span>
+          <span className="chart-legend-label" title={it.label}>
+            {it.label}
+          </span>
         </div>
       ))}
     </div>
   )
 }
 
-function computeXAxisLayout(count: number, isMobile: boolean) {
-  // Quanto mais categorias, mais agressivo precisamos ser.
-  // Objetivo: NÃO sobrepor. Tooltip cobre o nome completo.
+function computeXAxisLayout(count: number, isMobile: boolean, forceShowAllTicks: boolean) {
+  // Se houver scroll horizontal, podemos mostrar todos os ticks.
+  if (forceShowAllTicks) {
+    if (isMobile) return { interval: 0 as const, rotateDeg: -55, maxChars: 12, xHeight: 66, bottom: 72 }
+    return { interval: 0 as const, rotateDeg: -45, maxChars: 14, xHeight: 58, bottom: 64 }
+  }
+
   if (isMobile) {
     if (count <= 4) return { interval: 0 as const, rotateDeg: 0, maxChars: 14, xHeight: 38, bottom: 44 }
     if (count <= 6) return { interval: 0 as const, rotateDeg: -55, maxChars: 12, xHeight: 66, bottom: 72 }
@@ -126,6 +132,7 @@ export default function Dashboard() {
       })
   }, [])
 
+  // Hooks (useMemo) DEVEM ficar antes de returns condicionais
   const jobTitleData = useMemo(() => {
     const byJobTitle = stats?.byJobTitle ?? stats?.byRole ?? {}
     return Object.entries(byJobTitle)
@@ -149,12 +156,31 @@ export default function Dashboard() {
     ]
   }, [stats])
 
+  const jobLegendItems = useMemo(
+    () =>
+      jobTitleData.map((d, i) => ({
+        label: d.jobTitle,
+        color: COLORS[i % COLORS.length],
+      })),
+    [jobTitleData],
+  )
+
+  const roleLegendItems = useMemo(
+    () =>
+      systemRoleData.map((d, i) => ({
+        label: d.systemRole,
+        color: COLORS[i % COLORS.length],
+      })),
+    [systemRoleData],
+  )
+
+  // Agora sim pode ter returns condicionais
+  if (error) return <div className="card">{error}</div>
+  if (!stats) return <div className="card">Carregando estatísticas…</div>
+
   const totalAtivos = stats?.byActive?.active ?? 0
   const totalInativos = stats?.byActive?.inactive ?? 0
   const totalUsuarios = totalAtivos + totalInativos
-
-  if (error) return <div className="card">{error}</div>
-  if (!stats) return <div className="card">Carregando estatísticas…</div>
 
   const barChartHeight = isMobile ? 360 : 330
   const pieChartHeight = isMobile ? 340 : 320
@@ -165,8 +191,8 @@ export default function Dashboard() {
   const jobTitleMinWidth = shouldScrollJobTitle ? Math.max(900, jobTitleData.length * 140) : undefined
   const systemRoleMinWidth = shouldScrollSystemRole ? Math.max(900, systemRoleData.length * 140) : undefined
 
-  const jobAxis = computeXAxisLayout(jobTitleData.length, isMobile)
-  const roleAxis = computeXAxisLayout(systemRoleData.length, isMobile)
+  const jobAxis = computeXAxisLayout(jobTitleData.length, isMobile, shouldScrollJobTitle)
+  const roleAxis = computeXAxisLayout(systemRoleData.length, isMobile, shouldScrollSystemRole)
 
   // Tooltip: fundo branco + texto preto
   const tooltipContentStyle = {
@@ -246,7 +272,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <ChartLegend items={[{ label: 'Cargos', color: '#FFFFFF' }]} />
+        {/* Legenda dinâmica por cargo */}
+        <ChartLegend items={jobLegendItems} />
       </div>
 
       {!!systemRoleData.length && (
@@ -303,7 +330,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <ChartLegend items={[{ label: 'System Roles', color: '#FFFFFF' }]} />
+          {/* Legenda dinâmica por perfil */}
+          <ChartLegend items={roleLegendItems} />
         </div>
       )}
 

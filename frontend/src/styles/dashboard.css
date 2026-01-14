@@ -48,23 +48,37 @@
   font-weight: 700;
 }
 
-/* Legenda externa (fora do SVG) */
-.chart-legend {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+/* =========================
+   Legenda externa (fora do SVG)
+   GRID responsivo + scroll + ellipsis
+   ========================= */
 
+.chart-legend {
   margin-top: 10px;
+
+  display: grid;
+  gap: 10px 12px;
+
+  /* Desktop */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
   color: #fff;
   font-size: 13px;
+
+  /* Evita crescer infinito quando houver muitos itens */
+  max-height: 140px;
+  overflow-y: auto;
+
+  padding-right: 6px; /* respiro pro scrollbar */
+  box-sizing: border-box;
 }
 
 .chart-legend-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+
+  min-width: 0; /* CRÍTICO: permite ellipsis no label */
 }
 
 .chart-legend-swatch {
@@ -72,12 +86,27 @@
   height: 10px;
   border-radius: 3px;
   display: inline-block;
+  flex: 0 0 auto;
+
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .chart-legend-label {
   color: #fff;
   opacity: 0.95;
+
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .chart-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 160px;
+  }
 }
 
 /* Garantia de texto branco para ticks */
@@ -85,8 +114,6 @@
 .recharts-cartesian-axis-tick text {
   fill: #ffffff !important;
 }
-
-
 
 /* =========================
    Mobile
@@ -118,11 +145,17 @@
   .summary-card p {
     font-size: 13px;
   }
+
+  .chart-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 180px;
+  }
 }
 
 /* =========================
    (Opcional) Se você quiser usar uma classe para scroll no gráfico
    ========================= */
+
 .chart-scroll {
   width: 100%;
   overflow-x: auto;
