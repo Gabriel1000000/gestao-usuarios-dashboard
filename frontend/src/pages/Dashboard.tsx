@@ -231,7 +231,7 @@ export default function Dashboard() {
                   />
                   <Bar
                     dataKey="value"
-                    name="Cargo"
+                    name="Cargos"
                     maxBarSize={isMobile ? 56 : 42}
                     barSize={isMobile ? 38 : undefined}
                     radius={[6, 6, 0, 0]}
@@ -246,7 +246,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <ChartLegend items={[{ label: 'Quantidade', color: '#FFFFFF' }]} />
+        <ChartLegend items={[{ label: 'Cargos', color: '#FFFFFF' }]} />
       </div>
 
       {!!systemRoleData.length && (
@@ -303,7 +303,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <ChartLegend items={[{ label: 'Quantidade', color: '#FFFFFF' }]} />
+          <ChartLegend items={[{ label: 'System Roles', color: '#FFFFFF' }]} />
         </div>
       )}
 
