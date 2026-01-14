@@ -100,7 +100,6 @@ function ChartLegend({ items }: { items: Array<{ label: string; color: string }>
 }
 
 function computeXAxisLayout(count: number, isMobile: boolean, forceShowAllTicks: boolean) {
-  // Se houver scroll horizontal, podemos mostrar todos os ticks.
   if (forceShowAllTicks) {
     if (isMobile) return { interval: 0 as const, rotateDeg: -55, maxChars: 12, xHeight: 66, bottom: 72 }
     return { interval: 0 as const, rotateDeg: -45, maxChars: 14, xHeight: 58, bottom: 64 }
@@ -112,10 +111,14 @@ function computeXAxisLayout(count: number, isMobile: boolean, forceShowAllTicks:
     return { interval: 'preserveStartEnd' as const, rotateDeg: -55, maxChars: 11, xHeight: 66, bottom: 72 }
   }
 
-  // Desktop
   if (count <= 6) return { interval: 0 as const, rotateDeg: -45, maxChars: 14, xHeight: 58, bottom: 64 }
   if (count <= 8) return { interval: 1 as const, rotateDeg: -55, maxChars: 12, xHeight: 70, bottom: 76 }
   return { interval: 2 as const, rotateDeg: -55, maxChars: 12, xHeight: 70, bottom: 76 }
+}
+
+function formatPct(n: number) {
+  if (!Number.isFinite(n)) return '0%'
+  return `${Math.round(n)}%`
 }
 
 export default function Dashboard() {
@@ -132,7 +135,6 @@ export default function Dashboard() {
       })
   }, [])
 
-  // Hooks (useMemo) DEVEM ficar antes de returns condicionais
   const jobTitleData = useMemo(() => {
     const byJobTitle = stats?.byJobTitle ?? stats?.byRole ?? {}
     return Object.entries(byJobTitle)
@@ -174,13 +176,28 @@ export default function Dashboard() {
     [systemRoleData],
   )
 
-  // Agora sim pode ter returns condicionais
+  // === Resumo (melhorado) ===
+  const topJobTitles = useMemo(() => jobTitleData.slice(0, 3), [jobTitleData])
+  const topSystemRoles = useMemo(() => systemRoleData.slice(0, 3), [systemRoleData])
+
+  const totalAtivos = Number(stats?.byActive?.active ?? 0)
+  const totalInativos = Number(stats?.byActive?.inactive ?? 0)
+  const totalUsuarios = totalAtivos + totalInativos
+
+  const pctAtivos = totalUsuarios > 0 ? (totalAtivos / totalUsuarios) * 100 : 0
+  const pctInativos = totalUsuarios > 0 ? (totalInativos / totalUsuarios) * 100 : 0
+
+  const totalCargos = jobTitleData.length
+  const totalPerfis = systemRoleData.length
+
+  const principalCargo = jobTitleData[0]?.jobTitle
+  const principalCargoQtd = jobTitleData[0]?.value ?? 0
+
+  const principalPerfil = systemRoleData[0]?.systemRole
+  const principalPerfilQtd = systemRoleData[0]?.value ?? 0
+
   if (error) return <div className="card">{error}</div>
   if (!stats) return <div className="card">Carregando estatísticas…</div>
-
-  const totalAtivos = stats?.byActive?.active ?? 0
-  const totalInativos = stats?.byActive?.inactive ?? 0
-  const totalUsuarios = totalAtivos + totalInativos
 
   const barChartHeight = isMobile ? 360 : 330
   const pieChartHeight = isMobile ? 340 : 320
@@ -194,7 +211,6 @@ export default function Dashboard() {
   const jobAxis = computeXAxisLayout(jobTitleData.length, isMobile, shouldScrollJobTitle)
   const roleAxis = computeXAxisLayout(systemRoleData.length, isMobile, shouldScrollSystemRole)
 
-  // Tooltip: fundo branco + texto preto
   const tooltipContentStyle = {
     backgroundColor: '#FFFFFF',
     border: '1px solid rgba(0,0,0,0.15)',
@@ -208,15 +224,85 @@ export default function Dashboard() {
     <div className="dashboard-grid">
       <div className="summary-card">
         <h2>Resumo</h2>
-        <p>
-          Total de usuários: <strong>{totalUsuarios}</strong>
-        </p>
-        <p>
-          Total de usuários ativos: <strong>{totalAtivos}</strong>
-        </p>
-        <p>
-          Total de usuários inativos: <strong>{totalInativos}</strong>
-        </p>
+
+        <div className="summary-kpis">
+          <div className="summary-kpi">
+            <span className="summary-kpi-label">Total de usuários</span>
+            <strong className="summary-kpi-value">{totalUsuarios}</strong>
+          </div>
+
+          <div className="summary-kpi">
+            <span className="summary-kpi-label">Ativos</span>
+            <strong className="summary-kpi-value">
+              {totalAtivos} <span className="summary-kpi-sub">({formatPct(pctAtivos)})</span>
+            </strong>
+          </div>
+
+          <div className="summary-kpi">
+            <span className="summary-kpi-label">Inativos</span>
+            <strong className="summary-kpi-value">
+              {totalInativos} <span className="summary-kpi-sub">({formatPct(pctInativos)})</span>
+            </strong>
+          </div>
+
+          <div className="summary-kpi">
+            <span className="summary-kpi-label">Cargos cadastrados</span>
+            <strong className="summary-kpi-value">{totalCargos}</strong>
+          </div>
+
+          <div className="summary-kpi">
+            <span className="summary-kpi-label">Perfis (RBAC)</span>
+            <strong className="summary-kpi-value">{totalPerfis}</strong>
+          </div>
+        </div>
+
+        <div className="summary-splits">
+          <div className="summary-block">
+            <div className="summary-block-title">Top Cargos</div>
+
+            {topJobTitles.length ? (
+              <ul className="summary-list">
+                {topJobTitles.map((it) => (
+                  <li key={it.jobTitle} className="summary-list-item" title={it.jobTitle}>
+                    <span className="summary-list-name">{it.jobTitle}</span>
+                    <strong className="summary-list-value">{it.value}</strong>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="summary-empty">Sem dados de cargo.</div>
+            )}
+
+            {!!principalCargo && (
+              <div className="summary-hint">
+                Principal: <strong>{principalCargo}</strong> ({principalCargoQtd})
+              </div>
+            )}
+          </div>
+
+          <div className="summary-block">
+            <div className="summary-block-title">Top Perfis (RBAC)</div>
+
+            {topSystemRoles.length ? (
+              <ul className="summary-list">
+                {topSystemRoles.map((it) => (
+                  <li key={it.systemRole} className="summary-list-item" title={it.systemRole}>
+                    <span className="summary-list-name">{it.systemRole}</span>
+                    <strong className="summary-list-value">{it.value}</strong>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="summary-empty">Sem dados de perfil.</div>
+            )}
+
+            {!!principalPerfil && (
+              <div className="summary-hint">
+                Principal: <strong>{principalPerfil}</strong> ({principalPerfilQtd})
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="chart-card">
@@ -272,7 +358,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Legenda dinâmica por cargo */}
         <ChartLegend items={jobLegendItems} />
       </div>
 
@@ -330,7 +415,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Legenda dinâmica por perfil */}
           <ChartLegend items={roleLegendItems} />
         </div>
       )}

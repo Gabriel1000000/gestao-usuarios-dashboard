@@ -152,6 +152,111 @@
   }
 }
 
+
+/* ===== Resumo melhorado ===== */
+.summary-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin-top: 8px;
+}
+
+.summary-kpi {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.summary-kpi-label {
+  display: block;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+
+.summary-kpi-value {
+  font-size: 16px;
+}
+
+.summary-kpi-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.summary-splits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.summary-block-title {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.summary-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.summary-list-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+.summary-list-value {
+  font-size: 12px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.summary-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.summary-empty {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .summary-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-splits {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 /* =========================
    (Opcional) Se usar uma classe para scroll no gráfico
    ========================= */
