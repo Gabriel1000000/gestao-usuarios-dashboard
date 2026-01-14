@@ -319,4 +319,22 @@
   .user-card__footer .btn {
     padding: 10px 12px;
   }
+
+  .only-mobile {
+    display: none;
+  }
+
+  .only-desktop {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .only-mobile {
+      display: block;
+    }
+    .only-desktop {
+      display: none;
+    }
+    }
+
 }
