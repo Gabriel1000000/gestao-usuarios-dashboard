@@ -29,8 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("active") Boolean active
     );
 
-
-
     // Stats
     @Query("SELECT u.jobTitle, COUNT(u) FROM User u GROUP BY u.jobTitle")
     List<Object[]> countByJobTitle();
